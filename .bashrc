@@ -124,6 +124,6 @@ else
     echo "Downloading Packages ..."
     apt install --yes --print-uris $1 | grep \' | cut -d"'" -f2 | wget -q --show-progress  -i -
     sudo mv *.deb /var/cache/apt/archives/
-    sudo apt install -y $i
+    sudo apt install  $1
 fi
 }

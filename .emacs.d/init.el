@@ -56,8 +56,7 @@
      (320 . "#969896")
      (340 . "#a71d5d")
      (360 . "#969896"))) t)
- '(vc-annotate-very-old-color "#969896" t)
- '(x86-lookup-pdf "~/Dropbox/Books/Hacking/325383-sdm-vol-2abcd.pdf"))
+ '(vc-annotate-very-old-color "#969896" t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
