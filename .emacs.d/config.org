@@ -44,8 +44,14 @@
   (global-hl-line-mode 1) 
 
 ;;Scrollig
-(setq scroll-step            1
-      scroll-conservatively  10000)
+(setq scroll-margin 3
+      scroll-conservatively 101
+      scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01
+      scroll-preserve-screen-position t
+      auto-window-vscroll nil
+      hscroll-margin 5
+      hscroll-step 5)
 
 ;;Show parens
 (show-paren-mode 1)
@@ -59,9 +65,17 @@
 (set-face-attribute 'comint-highlight-prompt nil
                     :inherit nil)
 
+(setq x-stretch-cursor t)
+
+;; It's much easier to move around lines based on how they are displayed, rather than the actual line. This helps a ton with long log file 
+;; lines that may be wrapped:
+
+(setq line-move-visual t)
+;;Hide the mouse while typing: 
+(setq make-pointer-invisible t)
 #+END_SRC
 ** History
-maintain a history of past actions and a reasonable number of lists.
+Maintain a history of past actions and a reasonable number of lists.
 #+BEGIN_SRC emacs-lisp
 (setq-default history-length 1000)
 (setq history-delete-duplicates t
@@ -83,10 +97,21 @@ Recentf is a minor mode that builds a list of recently opened files. This list i
           recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
     (recentf-mode t)))
 #+END_SRC
-
 ** Email
+*** Notmuch
 #+BEGIN_SRC emacs-lisp
-(autoload 'notmuch "notmuch" "notmuch mail" t)
+  (autoload 'notmuch "notmuch" "notmuch mail" t)
+  (use-package notmuch
+    :ensure t
+    :config
+    (setq notmuch-search-oldest-first nil)
+    (setq notmuch-show-logo nil)
+      :bind (("C-x n" . notmuch-hello))
+    ;;(define 'notmuch-message-mode-map (kbd "C-c C-c") 'sent-mail-current-buffer) 
+   )
+
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (setq mail-user-agent 'message-user-agent)
 (setq mail-header-separator "\n")
 (defun  sent-mail-current-buffer ()
@@ -101,11 +126,8 @@ as input."
     (setq message-sendmail-envelope-from 'header)
     (setq mail-envelope-from 'header)
 
-;;(define-key message-mode-map (kbd "C-c C-s") 'sent-mail-current-buffer)
-
 (defun update-mail()
   "Update Local Mail "
-
   (interactive)
   (shell-command  "mbsync -a "  "*Messages*" )
   (shell-command "notmuch new " "*Messages*" )
@@ -198,7 +220,7 @@ as input."
 * Tweak
 ** Dired
 #+BEGIN_SRC emacs-lisp
-  (setq dired-listing-switches "-alh") ;; make value human readable
+  (setq dired-listing-switches "-lh --group-directories-first -t ") ;; make value human readable
   (setq wdired-allow-to-change-permissions t)
   (add-hook 'dired-mode-hook 'auto-revert-mode)
   (setq dired-recursive-copies (quote always)) ; “always” means no asking
@@ -774,11 +796,14 @@ Also see our page on EmacsWiki.
   :ensure t
   :config
   (evil-mode 1)
-  (add-to-list 'evil-emacs-state-modes 'elfeed-search-mode) 
-  (add-to-list 'evil-emacs-state-modes 'elfeed-show-mode) 
-  (add-to-list 'evil-emacs-state-modes 'special-mode) 
-  (add-to-list 'evil-emacs-state-modes 'eww-mode) 
-  (setq evil-insert-state-cursor  'box) 
+  (add-to-list 'evil-emacs-state-modes 'mingus-playlist-mode)
+  (add-to-list 'evil-emacs-state-modes 'elfeed-search-mode)
+  (add-to-list 'evil-emacs-state-modes 'mingus-browse-mode)
+  (add-to-list 'evil-emacs-state-modes 'elfeed-show-mode)
+  (add-to-list 'evil-emacs-state-modes 'special-mode)
+  (add-to-list 'evil-emacs-state-modes 'eww-mode)
+  (add-to-list 'evil-emacs-state-modes 'notmuch-tree-mode)
+  (setq evil-insert-state-cursor  'box)
   )
 
 #+END_SRC
@@ -986,7 +1011,6 @@ buffer is not visiting a file."
 
 #+END_SRC
 
-#+RESULTS:
 
 ** Leet
 #+BEGIN_SRC emacs-lisp
@@ -1488,14 +1512,17 @@ This lets you use C-x u (undo-tree-visualize) to visually walk through the chang
 #+END_SRC
 ** Multi shell
 #+BEGIN_SRC emacs-lisp
-  (use-package multi-term
-    :ensure t
-    :config
-    (setq multi-term-program "/bin/bash")
-    :bind (("M-]" . multi-term-next)
-           ("M-[" . multi-term-prev)
-           ("C-c s" . multi-term))
-    )
+(use-package multi-term
+  :ensure t
+  :config
+  (setq multi-term-program "/bin/bash")
+  (add-hook 'term-mode-hook
+	    (lambda () (setq scroll-margin '0)
+	      (hidden-mode-line-mode)))
+  :bind (("M-]" . multi-term-next)
+	 ("M-[" . multi-term-prev)
+	 ("C-c s" . multi-term))
+  )
 #+END_SRC
 ** Flycheck
 
@@ -1858,6 +1885,16 @@ will be re-sized to a smaller size that doesn't get in the way, but at the same 
   (setq golden-ratio-adjust-factor .8
 	golden-ratio-wide-adjust-factor .8)
   )
+#+END_SRC
+** Mingus
+#+BEGIN_SRC emacs-lisp
+(use-package mingus
+  :ensure t
+:config
+(setenv "MPD_HOST" "127.0.0.1")
+(setenv "MPD_PORT" "6601")
+(global-set-key (kbd "C-c m") 'mingus)
+)
 #+END_SRC
 * Scimax
 #+BEGIN_SRC emacs-lisp
